@@ -7,72 +7,109 @@
     <link rel="stylesheet" href="./node_modules/cm-chessboard/examples/styles/examples.css"/>
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/chessboard.css"/>
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/markers/markers.css"/>
+    <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/promotion-dialog/promotion-dialog.css"/>
 </head>
 <body>
 <h1><a href="./node_modules/cm-chessboard/">cm-chessboard</a></h1>
-<h2>Example: Markers Extension with pointer input</h2>
-<p>Use left and right click to create markers on the boards. The second board shows the usage of autoMarkers, when moving a piece.</p>
-<div class="board" id="dotBoard"></div>
-<div class="board" id="moveBoard"></div>
+<div class="board board-large" id="board"></div>
+<div id="output"></div>
 <div style="clear: both"></div>
-<button onclick="window.removeDots()">Remove dots</button>
 <script type="module">
-    import {Chessboard} from "./node_modules/cm-chessboard/src/Chessboard.js"
+    import {INPUT_EVENT_TYPE, COLOR, Chessboard, BORDER_TYPE} from "./node_modules/cm-chessboard/src/Chessboard.js"
+    import {Accessibility} from "./node_modules/cm-chessboard/src/extensions/accessibility/Accessibility.js"
+    import {PROMOTION_DIALOG_RESULT_TYPE, PromotionDialog} from "./node_modules/cm-chessboard/src/extensions/promotion-dialog/PromotionDialog.js"
     import {FEN} from "./node_modules/cm-chessboard/src/model/Position.js"
     import {MARKER_TYPE, Markers} from "./node_modules/cm-chessboard/src/extensions/markers/Markers.js"
-
-    const dotBoard = new Chessboard(document.getElementById("dotBoard"), {
-        position: FEN.start,
-        assetsCache: false,
-        assetsUrl: "./node_modules/cm-chessboard/assets/",
-        extensions: [{class: Markers}]
-    })
-    dotBoard.context.addEventListener("contextmenu", (event) => {
-        event.preventDefault()
-    })
-    dotBoard.context.addEventListener("mousedown", (event) => {
-        console.log("mousedown dotBoard", event)
-        let markerType
-        if (event.button === 0) {
-            markerType = MARKER_TYPE.dot
-        } else {
-            markerType = MARKER_TYPE.circlePrimary
-        }
-        const square = event.target.getAttribute("data-square")
-        const markersOnSquare = dotBoard.getMarkers(markerType, square)
-        if (markersOnSquare.length > 0) {
-            dotBoard.removeMarkers(markerType, square)
-        } else {
-            dotBoard.addMarker(markerType, square)
-        }
-    })
-    window.removeDots = () => {
-        dotBoard.removeMarkers(MARKER_TYPE.dot)
+    import {Chess} from "https://cdn.jsdelivr.net/npm/chess.mjs@1/src/Chess.js"
+    
+    const chess = new Chess();
+    let seed = 71;
+    function random() {
+        const x = Math.sin(seed++) * 10000;
+        const result = x - Math.floor(x);
+        console.log("random result with seed " + seed + ": " + result);
+        return result;
     }
-    const moveBoard = new Chessboard(document.getElementById("moveBoard"), {
-        position: "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR",
-        assetsUrl: "./node_modules/cm-chessboard/assets/",
-        style: {pieces: {file: "pieces/staunty.svg"}},
-        extensions: [{class: Markers, autoMarkers: MARKER_TYPE.frame}]
-    })
-    moveBoard.enableMoveInput(() => {
-        return true
-    })
-    const marker = {class: "marker-circle-danger", slice: "markerCircle"}
-    moveBoard.context.addEventListener("contextmenu", (event) => {
-        event.preventDefault()
-    })
-    moveBoard.context.addEventListener("mousedown", (event) => {
-        if (event.button === 2) {
-            const square = event.target.getAttribute("data-square")
-            const markersOnSquare = moveBoard.getMarkers(marker, square)
-            if (markersOnSquare.length > 0) {
-                moveBoard.removeMarkers(marker, square)
+
+    function makeEngineMove(chessboard) {
+        const possibleMoves = chess.moves({verbose: true});
+        if (possibleMoves.length > 0){
+            const randomIndex = Math.floor(random() * possibleMoves.length)
+            const randomMove = possibleMoves[randomIndex]
+            setTimeout(() => {
+                chess.move({from: randomMove.from, to: randomMove.to});
+                chessboard.setPosition(chess.fen(), true);
+                chessboard.enableMoveInput(inputHandler, COLOR.white)
+            })
+        }
+    }
+
+
+
+    function inputHandler(event) {
+        console.log("inputHandler", event)
+        if(event.type === INPUT_EVENT_TYPE.movingOverSquare) {
+            return // ignore this event
+        }
+        if(event.type !== INPUT_EVENT_TYPE.moveInputFinished) {
+            event.chessboard.removeLegalMovesMarkers()
+        }
+        if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
+            // mark legal moves
+            const moves = chess.moves({square: event.squareFrom, verbose: true})
+            event.chessboard.addLegalMovesMarkers(moves)
+            return moves.length > 0
+        } else if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
+            const move = {from: event.squareFrom, to: event.squareTo, promotion: event.promotion}
+            const result = chess.move(move)
+            if (result) {
+                event.chessboard.state.moveInputProcess.then(() => { // wait for the move input process has finished
+                    event.chessboard.setPosition(chess.fen(), true).then(() => { // update position, maybe castled and wait for animation has finished
+                        makeEngineMove(event.chessboard)
+                    })
+                })
             } else {
-                moveBoard.addMarker(marker, square)
+                // promotion?
+                let possibleMoves = chess.moves({square: event.squareFrom, verbose: true})
+                for (const possibleMove of possibleMoves) {
+                    if (possibleMove.promotion && possibleMove.to === event.squareTo) {
+                        event.chessboard.showPromotionDialog(event.squareTo, COLOR.white, (result) => {
+                            console.log("promotion result", result)
+                            if (result.type === PROMOTION_DIALOG_RESULT_TYPE.pieceSelected) {
+                                chess.move({from: event.squareFrom, to: event.squareTo, promotion: result.piece.charAt(1)})
+                                event.chessboard.setPosition(chess.fen(), true)
+                                makeEngineMove(event.chessboard)
+                            } else {
+                                // promotion canceled
+                                event.chessboard.enableMoveInput(inputHandler, COLOR.white)
+                                event.chessboard.setPosition(chess.fen(), true)
+                            }
+                        })
+                        return true
+                    }
+                }
+            }
+            return result
+        } else if (event.type === INPUT_EVENT_TYPE.moveInputFinished) {
+            if(event.legalMove) {
+                event.chessboard.disableMoveInput()
             }
         }
-    })
+    }
+
+    const board = new Chessboard(document.getElementById("board"), {
+        position: chess.fen(),
+        assetsUrl: "./node_modules/cm-chessboard/assets/",
+        style: {borderType: BORDER_TYPE.none, pieces: {file: "pieces/staunty.svg"}, animationDuration: 300},
+        orientation: COLOR.white,
+        extensions: [
+            {class: Markers, props: {autoMarkers: MARKER_TYPE.square}},
+            {class: PromotionDialog},
+            {class: Accessibility, props: {visuallyHidden: true}}
+        ]
+    });
+    console.log("chess.fen(): " + chess.fen());
+    board.enableMoveInput(inputHandler, COLOR.white);
 </script>
 </body>
 </html>
