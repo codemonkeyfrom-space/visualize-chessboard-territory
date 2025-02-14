@@ -12,8 +12,8 @@
 <h1><a href="./node_modules/cm-chessboard/">cm-chessboard</a></h1>
 <h2>Example: Markers Extension with pointer input</h2>
 <p>Use left and right click to create markers on the boards. The second board shows the usage of autoMarkers, when moving a piece.</p>
-<div class="board" id="board1"></div>
-<div class="board" id="board2"></div>
+<div class="board" id="dotBoard"></div>
+<div class="board" id="moveBoard"></div>
 <div style="clear: both"></div>
 <button onclick="window.removeDots()">Remove dots</button>
 <script type="module">
@@ -21,17 +21,17 @@
     import {FEN} from "./node_modules/cm-chessboard/src/model/Position.js"
     import {MARKER_TYPE, Markers} from "./node_modules/cm-chessboard/src/extensions/markers/Markers.js"
 
-    const board1 = new Chessboard(document.getElementById("board1"), {
+    const dotBoard = new Chessboard(document.getElementById("dotBoard"), {
         position: FEN.start,
         assetsCache: false,
         assetsUrl: "./node_modules/cm-chessboard/assets/",
         extensions: [{class: Markers}]
     })
-    board1.context.addEventListener("contextmenu", (event) => {
+    dotBoard.context.addEventListener("contextmenu", (event) => {
         event.preventDefault()
     })
-    board1.context.addEventListener("mousedown", (event) => {
-        console.log("mousedown board1", event)
+    dotBoard.context.addEventListener("mousedown", (event) => {
+        console.log("mousedown dotBoard", event)
         let markerType
         if (event.button === 0) {
             markerType = MARKER_TYPE.dot
@@ -39,37 +39,37 @@
             markerType = MARKER_TYPE.circlePrimary
         }
         const square = event.target.getAttribute("data-square")
-        const markersOnSquare = board1.getMarkers(markerType, square)
+        const markersOnSquare = dotBoard.getMarkers(markerType, square)
         if (markersOnSquare.length > 0) {
-            board1.removeMarkers(markerType, square)
+            dotBoard.removeMarkers(markerType, square)
         } else {
-            board1.addMarker(markerType, square)
+            dotBoard.addMarker(markerType, square)
         }
     })
     window.removeDots = () => {
-        board1.removeMarkers(MARKER_TYPE.dot)
+        dotBoard.removeMarkers(MARKER_TYPE.dot)
     }
-    const board2 = new Chessboard(document.getElementById("board2"), {
+    const moveBoard = new Chessboard(document.getElementById("moveBoard"), {
         position: "rn2k1r1/ppp1pp1p/3p2p1/5bn1/P7/2N2B2/1PPPPP2/2BNK1RR",
         assetsUrl: "./node_modules/cm-chessboard/assets/",
         style: {pieces: {file: "pieces/staunty.svg"}},
         extensions: [{class: Markers, autoMarkers: MARKER_TYPE.frame}]
     })
-    board2.enableMoveInput(() => {
+    moveBoard.enableMoveInput(() => {
         return true
     })
-    const myOwnMarker = {class: "marker-circle-danger", slice: "markerCircle"}
-    board2.context.addEventListener("contextmenu", (event) => {
+    const marker = {class: "marker-circle-danger", slice: "markerCircle"}
+    moveBoard.context.addEventListener("contextmenu", (event) => {
         event.preventDefault()
     })
-    board2.context.addEventListener("mousedown", (event) => {
+    moveBoard.context.addEventListener("mousedown", (event) => {
         if (event.button === 2) {
             const square = event.target.getAttribute("data-square")
-            const markersOnSquare = board2.getMarkers(myOwnMarker, square)
+            const markersOnSquare = moveBoard.getMarkers(marker, square)
             if (markersOnSquare.length > 0) {
-                board2.removeMarkers(myOwnMarker, square)
+                moveBoard.removeMarkers(marker, square)
             } else {
-                board2.addMarker(myOwnMarker, square)
+                moveBoard.addMarker(marker, square)
             }
         }
     })
