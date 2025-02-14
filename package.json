@@ -1,0 +1,30 @@
+{
+  "name": "marked-chessboard",
+  "version": "1.0.0",
+  "description": "Use cm-chessboard to highlight certain squares based on square control.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pabrams/marked-chessboard.git"
+  },
+  "keywords": [
+    "chess",
+    "chessboard",
+    "trainer",
+    "highlight",
+    "square",
+    "control"
+  ],
+  "author": "Paul Abrams",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pabrams/marked-chessboard/issues"
+  },
+  "homepage": "https://github.com/pabrams/marked-chessboard#readme",
+  "dependencies": {
+    "cm-chessboard": "^8.7.7"
+  }
+}
