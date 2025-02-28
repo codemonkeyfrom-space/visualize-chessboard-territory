@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/pabrams/marked-chessboard#readme",
   "dependencies": {
+    "chess.js": "^1.1.0",
     "cm-chessboard": "^8.7.7"
   }
 }

@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <title>cm-chessboard</title>
     <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0"/>
+    
     <link rel="stylesheet" href="./node_modules/cm-chessboard/examples/styles/examples.css"/>
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/chessboard.css"/>
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/markers/markers.css"/>
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/promotion-dialog/promotion-dialog.css"/>
 </head>
 <body>
+
 <h1><a href="./node_modules/cm-chessboard/">cm-chessboard</a></h1>
 <div class="board board-large" id="board"></div>
 <div id="output"></div>
@@ -19,9 +21,10 @@
     import {Accessibility} from "./node_modules/cm-chessboard/src/extensions/accessibility/Accessibility.js"
     import {PROMOTION_DIALOG_RESULT_TYPE, PromotionDialog} from "./node_modules/cm-chessboard/src/extensions/promotion-dialog/PromotionDialog.js"
     import {FEN} from "./node_modules/cm-chessboard/src/model/Position.js"
+    import {ARROW_TYPE, Arrows} from "./node_modules/cm-chessboard/src/extensions/arrows/Arrows.js"
     import {MARKER_TYPE, Markers} from "./node_modules/cm-chessboard/src/extensions/markers/Markers.js"
-    import {Chess} from "https://cdn.jsdelivr.net/npm/chess.mjs@1/src/Chess.js"
-    
+    import {Chess, SQUARES} from "./node_modules/chess.js/dist/esm/chess.js"
+ 
     const chess = new Chess();
     let seed = 71;
     function random() {
@@ -31,6 +34,28 @@
         return result;
     }
 
+    function showSquareOwnership(chessboard) {
+        const squares = SQUARES;
+        squares.forEach(square => {
+            const blackAttackers = chess.attackers(square, 'b');
+            const whiteAttackers = chess.attackers(square, 'w');
+
+            console.log(square + "attackers: " + whiteAttackers.length + ", " + blackAttackers.length);
+            if (blackAttackers.length > whiteAttackers.length){
+                setSquareBorder(square, "blue", blackAttackers.length);
+            }
+            if (whiteAttackers.length > blackAttackers.length ){
+                setSquareBorder(square, "red", whiteAttackers.length);
+            }
+        });
+    }
+
+    function setPosition(chessboard, fen, truth) {
+        console.log('setPosition');
+        chessboard.setPosition(fen, truth);
+        showSquareOwnership(chessboard);
+    }
+
     function makeEngineMove(chessboard) {
         const possibleMoves = chess.moves({verbose: true});
         if (possibleMoves.length > 0){
@@ -38,13 +63,26 @@
             const randomMove = possibleMoves[randomIndex]
             setTimeout(() => {
                 chess.move({from: randomMove.from, to: randomMove.to});
-                chessboard.setPosition(chess.fen(), true);
+                setPosition(chessboard, chess.fen(), true);
                 chessboard.enableMoveInput(inputHandler, COLOR.white)
             })
         }
     }
 
-
+    function setSquareBorder(square, color, width){
+        const squares = document.querySelectorAll("rect[data-square='" + square + "']");
+        squares.forEach(element => {
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            // Set the circle's attributes
+            circle.setAttribute('cx', element.cx); // Center x-coordinate
+            circle.setAttribute('cy', element.cy); // Center y-coordinate
+            circle.setAttribute('r', element.width/2);   // Radius
+            circle.setAttribute('fill', 'red'); // Fill color
+            element.parentElement.appendChild(circle);
+            element.style["stroke"]=color;
+            element.style["stroke-width"]=width; 
+        });
+    }
 
     function inputHandler(event) {
         console.log("inputHandler", event)
@@ -65,7 +103,7 @@
             if (result) {
                 event.chessboard.state.moveInputProcess.then(() => { // wait for the move input process has finished
                     event.chessboard.setPosition(chess.fen(), true).then(() => { // update position, maybe castled and wait for animation has finished
-                        makeEngineMove(event.chessboard)
+                        makeEngineMove(event.chessboard);
                     })
                 })
             } else {
@@ -76,13 +114,13 @@
                         event.chessboard.showPromotionDialog(event.squareTo, COLOR.white, (result) => {
                             console.log("promotion result", result)
                             if (result.type === PROMOTION_DIALOG_RESULT_TYPE.pieceSelected) {
-                                chess.move({from: event.squareFrom, to: event.squareTo, promotion: result.piece.charAt(1)})
-                                event.chessboard.setPosition(chess.fen(), true)
-                                makeEngineMove(event.chessboard)
+                                chess.move({from: event.squareFrom, to: event.squareTo, promotion: result.piece.charAt(1)});
+                                setPosition(event.chessboard, chess.fen(), true);
+                                makeEngineMove(event.chessboard);
                             } else {
                                 // promotion canceled
-                                event.chessboard.enableMoveInput(inputHandler, COLOR.white)
-                                event.chessboard.setPosition(chess.fen(), true)
+                                event.chessboard.enableMoveInput(inputHandler, COLOR.white);
+                                setPosition(event.chessboard, chess.fen(), true);
                             }
                         })
                         return true
@@ -104,11 +142,12 @@
         orientation: COLOR.white,
         extensions: [
             {class: Markers, props: {autoMarkers: MARKER_TYPE.square}},
+            {class: Arrows},
             {class: PromotionDialog},
             {class: Accessibility, props: {visuallyHidden: true}}
         ]
     });
-    console.log("chess.fen(): " + chess.fen());
+    showSquareOwnership(board);
     board.enableMoveInput(inputHandler, COLOR.white);
 </script>
 </body>
