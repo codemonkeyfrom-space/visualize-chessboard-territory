@@ -9,11 +9,19 @@
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/chessboard.css"/>
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/markers/markers.css"/>
     <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/promotion-dialog/promotion-dialog.css"/>
+    <link rel="stylesheet" href="./styles.css"/>
 </head>
 <body>
 
-<h1><a href="./node_modules/cm-chessboard/">cm-chessboard</a></h1>
-<div class="board board-large" id="board"></div>
+<div class="container">
+    <h1><a href="./node_modules/cm-chessboard/">cm-chessboard</a></h1>  
+    <div class="board board-large left-element" id="board"></div>
+    <div class="right-element">
+        <label for="chkSquareControl" title="Show square control by size of square border.">Square control</label>
+        <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue">
+    </div>
+</div>
+
 <div id="output"></div>
 <div style="clear: both"></div>
 <script type="module">
@@ -26,28 +34,39 @@
     import {Chess, SQUARES} from "./node_modules/chess.js/dist/esm/chess.js"
  
     const chess = new Chess();
-    let seed = 71;
+    let seed = 1;
     function random() {
         const x = Math.sin(seed++) * 10000;
         const result = x - Math.floor(x);
-        console.log("random result with seed " + seed + ": " + result);
         return result;
     }
 
     function showSquareOwnership(chessboard) {
+        
+        const checked = document.getElementById("chkSquareControl").checked;
+        console.log("checked", checked);
+
         const squares = SQUARES;
         squares.forEach(square => {
-            const blackAttackers = chess.attackers(square, 'b');
-            const whiteAttackers = chess.attackers(square, 'w');
+            if (checked) {
+                const blackAttackers = chess.attackers(square, 'b');
+                const whiteAttackers = chess.attackers(square, 'w');
 
-            console.log(square + "attackers: " + whiteAttackers.length + ", " + blackAttackers.length);
-            if (blackAttackers.length > whiteAttackers.length){
-                setSquareBorder(square, "blue", blackAttackers.length);
-            }
-            if (whiteAttackers.length > blackAttackers.length ){
-                setSquareBorder(square, "red", whiteAttackers.length);
+                console.log(square + "attackers: " + whiteAttackers.length + ", " + blackAttackers.length);
+                if (blackAttackers.length > whiteAttackers.length){
+                    setSquareBorder(square, "black", blackAttackers.length);
+                }
+                if (whiteAttackers.length > blackAttackers.length ){
+                    setSquareBorder(square, "white", whiteAttackers.length);
+                }
+                if (whiteAttackers.length == blackAttackers.length){
+                    setSquareBorder(square, "black", 0);
+                }
+            } else {
+                setSquareBorder(square, "black", 0);
             }
         });
+
     }
 
     function setPosition(chessboard, fen, truth) {
@@ -73,7 +92,7 @@
         const squares = document.querySelectorAll("rect[data-square='" + square + "']");
         squares.forEach(element => {
             element.style["stroke"]=color;
-            element.style["stroke-width"]=width; 
+            element.style["stroke-width"]=3*width;
         });
     }
 
@@ -141,6 +160,15 @@
         ]
     });
     showSquareOwnership(board);
+    document
+        .querySelector("#chkSquareControl")
+        .addEventListener("change", e => {
+            console.log("chk event", e);
+            showSquareOwnership(board);
+        })
+    ;
+
+
     board.enableMoveInput(inputHandler, COLOR.white);
 </script>
 </body>
