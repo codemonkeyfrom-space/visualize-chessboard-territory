@@ -72,13 +72,6 @@
     function setSquareBorder(square, color, width){
         const squares = document.querySelectorAll("rect[data-square='" + square + "']");
         squares.forEach(element => {
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            // Set the circle's attributes
-            circle.setAttribute('cx', element.cx); // Center x-coordinate
-            circle.setAttribute('cy', element.cy); // Center y-coordinate
-            circle.setAttribute('r', element.width/2);   // Radius
-            circle.setAttribute('fill', 'red'); // Fill color
-            element.parentElement.appendChild(circle);
             element.style["stroke"]=color;
             element.style["stroke-width"]=width; 
         });
