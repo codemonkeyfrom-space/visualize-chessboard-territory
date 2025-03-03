@@ -14,12 +14,18 @@
 <body>
 
 <div class="container">
-    <h1><a href="./node_modules/cm-chessboard/">cm-chessboard</a></h1>  
+    <h1>marked-chessboard</h1>  
     <div class="board board-large left-element" id="board"></div>
     <div class="right-element">
         <label for="chkSquareControl" title="Show square control by size of square border.">Square control</label>
         <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue">
+
+        <label for="txtInputFen"
     </div>
+</div>
+<div class="footer">
+    <hr>
+    Uses <a href="./node_modules/cm-chessboard/">cm-chessboard</a>
 </div>
 
 <div id="output"></div>
@@ -32,7 +38,8 @@
     import {ARROW_TYPE, Arrows} from "./node_modules/cm-chessboard/src/extensions/arrows/Arrows.js"
     import {MARKER_TYPE, Markers} from "./node_modules/cm-chessboard/src/extensions/markers/Markers.js"
     import {Chess, SQUARES} from "./node_modules/chess.js/dist/esm/chess.js"
- 
+    const svgNamespace = "http://www.w3.org/2000/svg";
+
     const chess = new Chess();
     let seed = 1;
     function random() {
@@ -89,10 +96,31 @@
     }
 
     function setSquareBorder(square, color, width){
+        
         const squares = document.querySelectorAll("rect[data-square='" + square + "']");
-        squares.forEach(element => {
-            element.style["stroke"]=color;
-            element.style["stroke-width"]=3*width;
+        squares.forEach(rectElement => {
+            console.log("rectElement: " + rectElement);
+            const rectWidth = rectElement.width.baseVal.value;
+            const rectX = rectElement.x.baseVal.value;
+            const rectY = rectElement.y.baseVal.value;
+            console.log("width, x, y:", rectWidth, rectX, rectY);
+            let newRect = document.createElementNS(svgNamespace, "rect");
+            newRect.setAttribute("x", rectX + width);
+            newRect.setAttribute("y", rectY + width);
+            newRect.setAttribute("class", "square");
+            newRect.setAttribute("width", rectWidth - 3*width);            
+            newRect.style["stroke"]=color;
+            newRect.style["stroke-width"]=3*width;
+            console.log("parentNode", rectElement.parentNode);
+            console.log("newRect", newRect);
+            // rectElement.parentNode.appendChild(newRect);
+            const gMarkers = document.querySelectorAll("g[class='markers']");
+            console.log("gMarkers", gMarkers);
+            gMarkers.forEach(g => {
+                g.appendChild(newRect);
+            })
+            rectElement.style["stroke"]=color;
+            rectElement.style["stroke-width"]=3*width;width
         });
     }
 
