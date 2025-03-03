@@ -1,9 +1,8 @@
-.container {
+.body-container {
     position: absolute;
     left: 150px;
     padding: 0;
     margin: 0;
-    height: 80%;
 }
 
 .left-element {
@@ -16,7 +15,7 @@
 
 .footer {
     position: absolute;
-    bottom: 10px;
+    bottom: 50px;
     width: 100%;
     height: 35px;
 }
