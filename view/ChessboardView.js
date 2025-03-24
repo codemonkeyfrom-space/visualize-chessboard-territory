@@ -5,8 +5,8 @@
  */
 
 import {VisualMoveInput} from "./VisualMoveInput.js"
-import {Position} from "../model/Position.js"
-import {EXTENSION_POINT} from "../model/Extension.js"
+import {Position} from "./model/Position.js"
+import {EXTENSION_POINT} from "./model/Extension.js"
 import {Svg} from "../lib/Svg.js"
 import {Utils} from "../lib/Utils.js"
 

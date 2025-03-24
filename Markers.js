@@ -3,7 +3,7 @@
  * Repository: https://github.com/shaack/cm-chessboard
  * License: MIT, see file 'LICENSE'
  */
-import {Extension, EXTENSION_POINT} from "../model/Extension.js"
+import {Extension, EXTENSION_POINT} from "./model/Extension.js"
 import {Svg} from "../lib/Svg.js"
 import {INPUT_EVENT_TYPE} from "../Chessboard.js"
 import {Utils} from "../lib/Utils.js"

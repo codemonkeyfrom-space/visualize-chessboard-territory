@@ -3,7 +3,7 @@
  * Repository: https://github.com/shaack/cm-chessboard
  * License: MIT, see file 'LICENSE'
  */
-import {Extension, EXTENSION_POINT} from "../model/Extension.js"
+import {Extension, EXTENSION_POINT} from "./model/Extension.js"
 import {COLOR, INPUT_EVENT_TYPE} from "../Chessboard.js"
 import {piecesTranslations, renderPieceTitle} from "./I18n.js"
 import {Utils} from "../lib/Utils.js"
