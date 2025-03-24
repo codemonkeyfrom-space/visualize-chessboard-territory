@@ -4,28 +4,75 @@
     <meta charset="UTF-8">
     <title>cm-chessboard</title>
     <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0"/>
-    
-    <link rel="stylesheet" href="./node_modules/cm-chessboard/examples/styles/examples.css"/>
-    <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/chessboard.css"/>
-    <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/markers/markers.css"/>
-    <link rel="stylesheet" href="./node_modules/cm-chessboard/assets/extensions/promotion-dialog/promotion-dialog.css"/>
+    <link rel="stylesheet" href="./markers.css"/>
+    <link rel="stylesheet" href="./chessboard.css"/>
     <link rel="stylesheet" href="./styles.css"/>
+    <link rel="stylesheet" href="./promotion-dialog.css"/>
 </head>
 <body>
 
 <div class="container">
-    <h1>marked-chessboard</h1>  
     <div class="board board-large left-element" id="board"></div>
     <div class="right-element">
-        <label for="chkSquareControl" title="Show square control by size of square border.">Square control</label>
-        <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue">
-
-        <label for="txtInputFen"
+        <h1>chessboard with square control</h1>  
+        <p>
+            <ul>
+                <li>
+                    Blue frames denote Black control
+                </li>
+                <li>
+                    Red frames denote White control
+                </li>
+                <li>
+                    The higher the control, the more opaque the frame will appear.
+                </li>
+            </ul>
+    
+        </p>
+        <br/><br/> 
+        <h2>
+            <label for="txtInputFen" title="input FEN:">
+                Set Position <a href="https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation">(Forsyth-Edwards Notation)</a>
+            </label>
+        </h2>
+        <table>
+            <tr>
+                <td>
+                    <label for="ddFEN" title="Select FEN">Select FEN:</label>
+                </td>
+                <td>
+                    <select id="ddFEN" size="1">
+                        <option value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq">Standard starting position</option>
+                        <option value="5k2/pp4pp/3bpp2/1P6/8/P2KP3/5PPP/2B5 b">Bxh2 Fischer vs. Spassky</option>
+                        <option value="5rk1/pp4pp/4p3/2R3Q1/3n4/2q4r/P1P2PPP/5RK1 b">1912 Levitsky Marshall</option>
+                        <!-- Add more options here -->
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="txtFEN" title="Select FEN:">Or enter manually:</label>
+                </td>
+                <td>
+                    <input id="txtFEN" type="text" name="FEN" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq" size="40">
+                    <button id="btnFEN" type="button">apply</button>
+                </td>
+            </tr>
+        </table>
+        <br/><br/>
+        <br/><br/>
+        <h2>
+            Square Control
+        </h2>
+        <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked">
+        <label for="chkSquareControl" title="Show square control by size of square border.">Show</label>
     </div>
-</div>
-<div class="footer">
-    <hr>
-    Uses <a href="./node_modules/cm-chessboard/">cm-chessboard</a>
+    <div class="footer">
+        <hr>
+        Source <a href="https://github.com/pabrams/marked-chessboard">github</a>
+        <br/>
+        Uses <a href="https://github.com/shaack/cm-chessboard">cm-chessboard</a>
+    </div>
 </div>
 
 <div id="output"></div>
@@ -35,116 +82,114 @@
     import {Accessibility} from "./node_modules/cm-chessboard/src/extensions/accessibility/Accessibility.js"
     import {PROMOTION_DIALOG_RESULT_TYPE, PromotionDialog} from "./node_modules/cm-chessboard/src/extensions/promotion-dialog/PromotionDialog.js"
     import {FEN} from "./node_modules/cm-chessboard/src/model/Position.js"
-    import {ARROW_TYPE, Arrows} from "./node_modules/cm-chessboard/src/extensions/arrows/Arrows.js"
     import {MARKER_TYPE, Markers} from "./node_modules/cm-chessboard/src/extensions/markers/Markers.js"
     import {Chess, SQUARES} from "./node_modules/chess.js/dist/esm/chess.js"
     const svgNamespace = "http://www.w3.org/2000/svg";
 
-    const chess = new Chess();
-    let seed = 1;
-    function random() {
-        const x = Math.sin(seed++) * 10000;
-        const result = x - Math.floor(x);
-        return result;
-    }
+    let chess = new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
 
-    function showSquareOwnership(chessboard) {
-        
-        const checked = document.getElementById("chkSquareControl").checked;
-        console.log("checked", checked);
-
-        const squares = SQUARES;
-        squares.forEach(square => {
-            if (checked) {
-                const blackAttackers = chess.attackers(square, 'b');
-                const whiteAttackers = chess.attackers(square, 'w');
-
-                console.log(square + "attackers: " + whiteAttackers.length + ", " + blackAttackers.length);
-                if (blackAttackers.length > whiteAttackers.length){
-                    setSquareBorder(square, "black", blackAttackers.length);
-                }
-                if (whiteAttackers.length > blackAttackers.length ){
-                    setSquareBorder(square, "white", whiteAttackers.length);
-                }
-                if (whiteAttackers.length == blackAttackers.length){
-                    setSquareBorder(square, "black", 0);
-                }
-            } else {
-                setSquareBorder(square, "black", 0);
+    function showSquareControl(chessboard, square) {
+        console.log("Square", square);
+        const blackAttackers = chess.attackers(square, 'b').length;
+        const whiteAttackers = chess.attackers(square, 'w').length;
+        console.log("Black attackers", blackAttackers);
+        console.log("White attackers", whiteAttackers);
+        let netAttackers = blackAttackers - whiteAttackers;
+        console.log("Net attackers", netAttackers);
+        let color = "";
+        if (netAttackers > 0) {
+            color = 'b';
+        } else if (netAttackers < 0) {
+            color = 'w';
+        }
+        netAttackers = Math.abs(netAttackers);
+        const blackMarkerType = MARKER_TYPE.framePrimary
+        const whiteMarkerType = MARKER_TYPE.frameDanger
+        const piece = chessboard.getPiece(square) || ""
+        console.log("piece", piece)
+        if (color === 'b'){
+            for (let i=0; i < netAttackers; i++){
+                chessboard.addMarker(blackMarkerType, square);
             }
-        });
+            if (piece.startsWith('w')){
+                chessboard.addMarker(MARKER_TYPE.circlePrimary, square);
+            }
+        } 
 
-    }
-
-    function setPosition(chessboard, fen, truth) {
-        console.log('setPosition');
-        chessboard.setPosition(fen, truth);
-        showSquareOwnership(chessboard);
-    }
-
-    function makeEngineMove(chessboard) {
-        const possibleMoves = chess.moves({verbose: true});
-        if (possibleMoves.length > 0){
-            const randomIndex = Math.floor(random() * possibleMoves.length)
-            const randomMove = possibleMoves[randomIndex]
-            setTimeout(() => {
-                chess.move({from: randomMove.from, to: randomMove.to});
-                setPosition(chessboard, chess.fen(), true);
-                chessboard.enableMoveInput(inputHandler, COLOR.white)
-            })
+        if (color === 'w') {
+            for (let i=0; i < netAttackers; i++){
+                chessboard.addMarker(whiteMarkerType, square);
+            }
+            
+            if (piece.startsWith('b')){
+                chessboard.addMarker(MARKER_TYPE.circleDanger, square);
+            }
         }
     }
 
-    function setSquareBorder(square, color, width){
-        
-        const squares = document.querySelectorAll("rect[data-square='" + square + "']");
-        squares.forEach(rectElement => {
-            console.log("rectElement: " + rectElement);
-            const rectWidth = rectElement.width.baseVal.value;
-            const rectX = rectElement.x.baseVal.value;
-            const rectY = rectElement.y.baseVal.value;
-            console.log("width, x, y:", rectWidth, rectX, rectY);
-            let newRect = document.createElementNS(svgNamespace, "rect");
-            newRect.setAttribute("x", rectX + width);
-            newRect.setAttribute("y", rectY + width);
-            newRect.setAttribute("class", "square");
-            newRect.setAttribute("width", rectWidth - 3*width);            
-            newRect.style["stroke"]=color;
-            newRect.style["stroke-width"]=3*width;
-            console.log("parentNode", rectElement.parentNode);
-            console.log("newRect", newRect);
-            // rectElement.parentNode.appendChild(newRect);
-            const gMarkers = document.querySelectorAll("g[class='markers']");
-            console.log("gMarkers", gMarkers);
-            gMarkers.forEach(g => {
-                g.appendChild(newRect);
-            })
-            rectElement.style["stroke"]=color;
-            rectElement.style["stroke-width"]=3*width;width
+    function showAllSquareControl(chessboard){
+        chessboard.removeMarkers();
+        const checked = document.getElementById("chkSquareControl").checked;
+        console.log('checked', checked);
+        if (checked){
+            const squares = SQUARES;
+            squares.forEach((square) => {
+                showSquareControl(chessboard, square);
+            });
+        }
+    }
+
+    function applyFEN(chessboard) {
+        const fen = document.getElementById("txtFEN").value;
+        chess = new Chess(fen);
+        chessboard.setPosition(chess.fen(), true).then(() => { // update position, maybe castled and wait for animation has finished
+            board.enableMoveInput(inputHandler, chess.turn);
         });
+    }
+
+    function getSquareColor(squareString) {
+        let ordSquare = squareString;
+        ordSquare = ordSquare.replace("a", "1");
+        ordSquare = ordSquare.replace("b", "2");
+        ordSquare = ordSquare.replace("c", "3");
+        ordSquare = ordSquare.replace("d", "4");
+        ordSquare = ordSquare.replace("e", "5");
+        ordSquare = ordSquare.replace("f", "6");
+        ordSquare = ordSquare.replace("g", "7");
+        ordSquare = ordSquare.replace("h", "8");
+
+        const file = parseInt(ordSquare.substring(0, 1));
+        const rank = parseInt(ordSquare.substring(1, 2));
+        
+        if ((file + rank) % 2 == 0) {
+            return "b";
+        } else  {
+            return "w";
+        }
     }
 
     function inputHandler(event) {
-        console.log("inputHandler", event)
+        console.log("input event", event);
         if(event.type === INPUT_EVENT_TYPE.movingOverSquare) {
-            return // ignore this event
+            showAllSquareControl(event.chessboard);
         }
         if(event.type !== INPUT_EVENT_TYPE.moveInputFinished) {
-            event.chessboard.removeLegalMovesMarkers()
+            event.chessboard.removeLegalMovesMarkers();
+            showAllSquareControl(event.chessboard);
         }
         if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
             // mark legal moves
             const moves = chess.moves({square: event.squareFrom, verbose: true})
-            event.chessboard.addLegalMovesMarkers(moves)
+            event.chessboard.addLegalMovesMarkers(moves);
             return moves.length > 0
         } else if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
             const move = {from: event.squareFrom, to: event.squareTo, promotion: event.promotion}
-            const result = chess.move(move)
+            const result = chess.move(move);
             if (result) {
                 event.chessboard.state.moveInputProcess.then(() => { // wait for the move input process has finished
                     event.chessboard.setPosition(chess.fen(), true).then(() => { // update position, maybe castled and wait for animation has finished
-                        makeEngineMove(event.chessboard);
-                    })
+                        event.chessboard.enableMoveInput(inputHandler, chess.turn);
+                    });
                 })
             } else {
                 // promotion?
@@ -152,16 +197,12 @@
                 for (const possibleMove of possibleMoves) {
                     if (possibleMove.promotion && possibleMove.to === event.squareTo) {
                         event.chessboard.showPromotionDialog(event.squareTo, COLOR.white, (result) => {
-                            console.log("promotion result", result)
                             if (result.type === PROMOTION_DIALOG_RESULT_TYPE.pieceSelected) {
                                 chess.move({from: event.squareFrom, to: event.squareTo, promotion: result.piece.charAt(1)});
-                                setPosition(event.chessboard, chess.fen(), true);
-                                makeEngineMove(event.chessboard);
-                            } else {
-                                // promotion canceled
-                                event.chessboard.enableMoveInput(inputHandler, COLOR.white);
-                                setPosition(event.chessboard, chess.fen(), true);
                             }
+                            event.chessboard.setPosition(chess.fen(), true).then(() => {
+                                event.chessboard.enableMoveInput(inputHandler, chess.turn);
+                            });
                         })
                         return true
                     }
@@ -172,32 +213,56 @@
             if(event.legalMove) {
                 event.chessboard.disableMoveInput()
             }
+            showAllSquareControl(event.chessboard);
         }
     }
 
     const board = new Chessboard(document.getElementById("board"), {
         position: chess.fen(),
         assetsUrl: "./node_modules/cm-chessboard/assets/",
-        style: {borderType: BORDER_TYPE.none, pieces: {file: "pieces/staunty.svg"}, animationDuration: 300},
+        responsive: true,
+        style: {
+            cssClass: "black-and-white",
+            borderType: BORDER_TYPE.frame, 
+            pieces: {file: "pieces/staunty.svg"}, 
+            animationDuration: 300
+        },
         orientation: COLOR.white,
         extensions: [
             {class: Markers, props: {autoMarkers: MARKER_TYPE.square}},
-            {class: Arrows},
             {class: PromotionDialog},
-            {class: Accessibility, props: {visuallyHidden: true}}
-        ]
+            {
+                class: Accessibility,
+                props: {
+                    brailleNotationInAlt: true, // show the braille notation of the position in the alt attribute of the SVG image
+                    boardAsTable: true, // display the board additionally as HTML table
+                    movePieceForm: true, // display a form to move a piece (from, to, move)
+                    piecesAsList: true, // display the pieces additionally as List
+                    visuallyHidden: true // hide all those extra outputs visually but keep them accessible for screen readers and braille displays
+                }
+            }]
     });
-    showSquareOwnership(board);
+
     document
         .querySelector("#chkSquareControl")
         .addEventListener("change", e => {
-            console.log("chk event", e);
-            showSquareOwnership(board);
-        })
-    ;
+            showAllSquareControl(board);
+        });
+    document
+        .querySelector("#ddFEN")
+        .addEventListener("change", e => {
+            document.getElementById("txtFEN").value = document.getElementById("ddFEN").value
+            applyFEN(board);
+            showAllSquareControl(board);
+        });
+    document
+        .querySelector("#btnFEN")
+        .addEventListener("click", () => {
+            applyFEN(board);
+        });
 
-
-    board.enableMoveInput(inputHandler, COLOR.white);
+    showAllSquareControl(board);
+    board.enableMoveInput(inputHandler, chess.turn);
 </script>
 </body>
 </html>
