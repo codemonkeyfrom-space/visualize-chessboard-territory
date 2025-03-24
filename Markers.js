@@ -4,9 +4,9 @@
  * License: MIT, see file 'LICENSE'
  */
 import {Extension, EXTENSION_POINT} from "./model/Extension.js"
-import {Svg} from "../lib/Svg.js"
-import {INPUT_EVENT_TYPE} from "../Chessboard.js"
-import {Utils} from "../lib/Utils.js"
+import {Svg} from "./lib/Svg.js"
+import {INPUT_EVENT_TYPE} from "./Chessboard.js"
+import {Utils} from "./lib/Utils.js"
 
 export const MARKER_TYPE = {
     frame: {class: "marker-frame", slice: "markerFrame"},
