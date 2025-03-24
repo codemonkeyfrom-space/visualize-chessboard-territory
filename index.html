@@ -81,12 +81,12 @@
 <div id="output"></div>
 <div style="clear: both"></div>
 <script type="module">
-    import {INPUT_EVENT_TYPE, COLOR, Chessboard, BORDER_TYPE} from "./node_modules/cm-chessboard/src/Chessboard.js"
-    import {Accessibility} from "./node_modules/cm-chessboard/src/extensions/accessibility/Accessibility.js"
-    import {PROMOTION_DIALOG_RESULT_TYPE, PromotionDialog} from "./node_modules/cm-chessboard/src/extensions/promotion-dialog/PromotionDialog.js"
-    import {FEN} from "./node_modules/cm-chessboard/src/model/Position.js"
-    import {MARKER_TYPE, Markers} from "./node_modules/cm-chessboard/src/extensions/markers/Markers.js"
-    import {Chess, SQUARES} from "./node_modules/chess.js/dist/esm/chess.js"
+    import {INPUT_EVENT_TYPE, COLOR, Chessboard, BORDER_TYPE} from "./Chessboard.js"
+    import {Accessibility} from "./Accessibility.js"
+    import {PROMOTION_DIALOG_RESULT_TYPE, PromotionDialog} from "./PromotionDialog.js"
+    import {FEN} from "./Position.js"
+    import {MARKER_TYPE, Markers} from "./Markers.js"
+    import {Chess, SQUARES} from "./chess.js"
     const svgNamespace = "http://www.w3.org/2000/svg";
 
     let chess = new Chess(document.getElementById("txtFEN").value );
