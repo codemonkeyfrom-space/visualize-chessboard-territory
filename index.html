@@ -26,6 +26,9 @@
                 <li>
                     The higher the control, the more opaque the frame will appear.
                 </li>
+                <li>
+                    Pieces <i>en pris</i> are circled.
+                </li>
             </ul>
     
         </p>
@@ -43,9 +46,9 @@
                 <td>
                     <select id="ddFEN" size="1">
                         <option value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq">Standard starting position</option>
-                        <option value="5k2/pp4pp/3bpp2/1P6/8/P2KP3/5PPP/2B5 b">Bxh2 Fischer vs. Spassky</option>
+                        <option value="5k2/pp4pp/3bpp2/1P6/8/P2KP3/5PPP/2B5 b">1972 Fischer Spassky game 2</option>
                         <option value="5rk1/pp4pp/4p3/2R3Q1/3n4/2q4r/P1P2PPP/5RK1 b">1912 Levitsky Marshall</option>
-                        <!-- Add more options here -->
+                        <option value="r1b2rk1/pp1ppp1p/5bp1/q7/3nP2Q/1BN1B3/PPP2PPP/R4RK1 w">1962 Nezhmetdinov Chernikov</option>
                     </select>
                 </td>
             </tr>
@@ -54,7 +57,7 @@
                     <label for="txtFEN" title="Select FEN:">Or enter manually:</label>
                 </td>
                 <td>
-                    <input id="txtFEN" type="text" name="FEN" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq" size="40">
+                    <input id="txtFEN" type="text" name="FEN" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq" size="50">
                     <button id="btnFEN" type="button">apply</button>
                 </td>
             </tr>
@@ -86,16 +89,12 @@
     import {Chess, SQUARES} from "./node_modules/chess.js/dist/esm/chess.js"
     const svgNamespace = "http://www.w3.org/2000/svg";
 
-    let chess = new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq");
+    let chess = new Chess(document.getElementById("txtFEN").value );
 
     function showSquareControl(chessboard, square) {
-        console.log("Square", square);
         const blackAttackers = chess.attackers(square, 'b').length;
         const whiteAttackers = chess.attackers(square, 'w').length;
-        console.log("Black attackers", blackAttackers);
-        console.log("White attackers", whiteAttackers);
         let netAttackers = blackAttackers - whiteAttackers;
-        console.log("Net attackers", netAttackers);
         let color = "";
         if (netAttackers > 0) {
             color = 'b';
@@ -106,7 +105,6 @@
         const blackMarkerType = MARKER_TYPE.framePrimary
         const whiteMarkerType = MARKER_TYPE.frameDanger
         const piece = chessboard.getPiece(square) || ""
-        console.log("piece", piece)
         if (color === 'b'){
             for (let i=0; i < netAttackers; i++){
                 chessboard.addMarker(blackMarkerType, square);
@@ -130,7 +128,6 @@
     function showAllSquareControl(chessboard){
         chessboard.removeMarkers();
         const checked = document.getElementById("chkSquareControl").checked;
-        console.log('checked', checked);
         if (checked){
             const squares = SQUARES;
             squares.forEach((square) => {
@@ -169,7 +166,6 @@
     }
 
     function inputHandler(event) {
-        console.log("input event", event);
         if(event.type === INPUT_EVENT_TYPE.movingOverSquare) {
             showAllSquareControl(event.chessboard);
         }
@@ -178,7 +174,6 @@
             showAllSquareControl(event.chessboard);
         }
         if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
-            // mark legal moves
             const moves = chess.moves({square: event.squareFrom, verbose: true})
             event.chessboard.addLegalMovesMarkers(moves);
             return moves.length > 0
