@@ -4,7 +4,7 @@
  * License: MIT, see file 'LICENSE'
  */
 import {Extension, EXTENSION_POINT} from "./model/Extension.js"
-import {COLOR, PIECE} from "../Chessboard.js"
+import {COLOR, PIECE} from "./Chessboard.js"
 import {Svg} from "./lib/Svg.js"
 import {Utils} from "./lib/Utils.js"
 
