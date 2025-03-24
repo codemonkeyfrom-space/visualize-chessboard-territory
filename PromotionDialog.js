@@ -3,10 +3,10 @@
  * Repository: https://github.com/shaack/cm-chessboard
  * License: MIT, see file 'LICENSE'
  */
-import {Extension, EXTENSION_POINT} from "../../model/Extension.js"
-import {COLOR, PIECE} from "../../Chessboard.js"
-import {Svg} from "../../lib/Svg.js"
-import {Utils} from "../../lib/Utils.js"
+import {Extension, EXTENSION_POINT} from "../model/Extension.js"
+import {COLOR, PIECE} from "../Chessboard.js"
+import {Svg} from "../lib/Svg.js"
+import {Utils} from "../lib/Utils.js"
 
 const DISPLAY_STATE = {
     hidden: "hidden",
