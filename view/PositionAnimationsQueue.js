@@ -3,9 +3,9 @@
  * Repository: https://github.com/shaack/cm-chessboard
  * License: MIT, see file 'LICENSE'
  */
-import {FEN, Position} from "./model/Position.js"
+import {FEN, Position} from "../model/Position.js"
 import {Svg} from "../lib/Svg.js"
-import {EXTENSION_POINT} from "./model/Extension.js"
+import {EXTENSION_POINT} from "../model/Extension.js"
 import {Utils} from "../lib/Utils.js"
 
 /*
