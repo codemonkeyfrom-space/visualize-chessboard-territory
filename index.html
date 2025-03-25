@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>cm-chessboard</title>
+    <title>Chessboard with Square Control</title>
     <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0"/>
     <link rel="stylesheet" href="./markers.css"/>
     <link rel="stylesheet" href="./chessboard.css"/>
     <link rel="stylesheet" href="./styles.css"/>
     <link rel="stylesheet" href="./promotion-dialog.css"/>
+
+    <meta name="description" content="A chessboard that shows square control visually.">
+    <meta name="keywords" content="chessboard, chess, square control, visualization, visualize, FEN, Forsyth-Edwards Notation, open source, JavaScript">
+    <meta name="author" content="Paul Abrams">
+    <meta name="robots" content="index, follow">
 </head>
 <body>
 
@@ -34,6 +39,13 @@
         </p>
         <br/><br/> 
         <h2>
+            Square Control
+        </h2>
+        <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked">
+        <label for="chkSquareControl" title="Show square control by size of square border.">Show</label>
+        <br/><br/>
+        <br/><br/>
+        <h2>
             <label for="txtInputFen" title="input FEN:">
                 Set Position <a href="https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation">(Forsyth-Edwards Notation)</a>
             </label>
@@ -45,10 +57,12 @@
                 </td>
                 <td>
                     <select id="ddFEN" size="1">
-                        <option value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq">Standard starting position</option>
-                        <option value="5k2/pp4pp/3bpp2/1P6/8/P2KP3/5PPP/2B5 b">1972 Fischer Spassky game 2</option>
+                        <option value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq" selected>Standard starting position</option>
                         <option value="5rk1/pp4pp/4p3/2R3Q1/3n4/2q4r/P1P2PPP/5RK1 b">1912 Levitsky Marshall</option>
                         <option value="r1b2rk1/pp1ppp1p/5bp1/q7/3nP2Q/1BN1B3/PPP2PPP/R4RK1 w">1962 Nezhmetdinov Chernikov</option>
+                        <option value="6k1/5r1p/p2N4/nppP2q1/2P5/1P2N3/PQ5P/7K w">1963 Petrosian Spassky</option>
+                        <option value="r1b2r1k/4qp1p/p2ppb1Q/4nP2/1p1NP3/2N5/PPP4P/2KR1BR1 w">1965 Kholmov Bronstein</option>
+                        <option value="5k2/pp4pp/3bpp2/1P6/8/P2KP3/5PPP/2B5 b">1972 Fischer Spassky game 2</option>
                     </select>
                 </td>
             </tr>
@@ -57,24 +71,17 @@
                     <label for="txtFEN" title="Select FEN:">Or enter manually:</label>
                 </td>
                 <td>
-                    <input id="txtFEN" type="text" name="FEN" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq" size="50">
+                    <input id="txtFEN" type="text" name="FEN" value="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq" size="40">
                     <button id="btnFEN" type="button">apply</button>
                 </td>
             </tr>
         </table>
-        <br/><br/>
-        <br/><br/>
-        <h2>
-            Square Control
-        </h2>
-        <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked">
-        <label for="chkSquareControl" title="Show square control by size of square border.">Show</label>
     </div>
     <div class="footer">
         <hr>
         Source <a href="https://github.com/pabrams/marked-chessboard">github</a>
         <br/>
-        Uses <a href="https://github.com/shaack/cm-chessboard">cm-chessboard</a>
+        Uses <a href="https://github.com/shaack/cm-chessboard">cm-chessboard</a> and <a href="https://github.com/jhlywa/chess.js">chess.js</a>.
     </div>
 </div>
 

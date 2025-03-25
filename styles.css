@@ -11,6 +11,8 @@
 
 .right-element {
     float: left;
+    border-style: dotted;
+    padding: 50px;
 }
 
 .footer {
