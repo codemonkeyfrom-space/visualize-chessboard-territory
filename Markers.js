@@ -30,7 +30,7 @@ export class Markers extends Extension {
         })
         this.props = {
             autoMarkers: MARKER_TYPE.frame, // set to `null` to disable autoMarkers
-            sprite: "extensions/markers/markers.svg" // the sprite file of the markers
+            sprite: "markers.svg" // the sprite file of the markers
         }
         Object.assign(this.props, props)
         if (chessboard.props.assetsCache) {

@@ -1,10 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-W4K29XRX');</script>
+    <!-- End Google Tag Manager -->
+            
     <meta charset="UTF-8">
     <title>Chessboard with Square Control</title>
     <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1.0"/>
     <link rel="stylesheet" href="./markers.css"/>
+    <link rel="stylesheet" href="./arrows.css">
     <link rel="stylesheet" href="./chessboard.css"/>
     <link rel="stylesheet" href="./styles.css"/>
     <link rel="stylesheet" href="./promotion-dialog.css"/>
@@ -26,7 +35,10 @@
     
 </head>
 <body>
-
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-W4K29XRX"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
 <div class="container">
     <div class="board board-large left-element" id="board"></div>
     <div class="right-element">
@@ -54,8 +66,8 @@
         </h2>
         <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked">
         <label for="chkSquareControl" title="Show square control by size of square border.">Show</label>
-        <input id="chkSquareControlHover" type="checkbox" name="checkboxName" value="checkboxValue">
-        <label for="chkSquareControlHover" title="Show square control only while hovering over the square.">Only on hover</label>
+        <input id="chkSquareControlHover" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked>
+        <label for="chkSquareControlHover" title="When hovering over a square, show arrows from the pieces controlling that square.">Show controlling pieces on hover</label>
         <br/><br/>
         <br/><br/>
         <h2>
@@ -106,6 +118,7 @@
     import {PROMOTION_DIALOG_RESULT_TYPE, PromotionDialog} from "./PromotionDialog.js"
     import {FEN} from "./Position.js"
     import {MARKER_TYPE, Markers} from "./Markers.js"
+    import {ARROW_TYPE, Arrows} from "./Arrows.js"
     import {Chess, SQUARES} from "./chess.js"
     const svgNamespace = "http://www.w3.org/2000/svg";
 
@@ -143,6 +156,26 @@
                 chessboard.addMarker(MARKER_TYPE.circleDanger, square);
             }
         }
+    }
+
+    function showControlArrows(chessboard, square) {
+        chessboard.removeArrows();
+        const piece = chessboard.getPiece(square) || "";
+        const color = piece.charAt(0);
+        let redType = ARROW_TYPE.danger;
+        let blueType = ARROW_TYPE.default;
+        let dangerType = ARROW_TYPE.danger;
+        let nullType = ARROW_TYPE.danger;
+        let safeType = ARROW_TYPE.pointy;
+        chess.attackers(square, 'b').forEach((attacker) => {
+            chessboard.addArrow(blueType, attacker, square);
+
+        })
+        
+        chess.attackers(square, 'w').forEach((attacker) => {
+            chessboard.addArrow(redType, attacker, square);
+        });
+        
     }
 
     function showAllSquareControl(chessboard){
@@ -187,11 +220,15 @@
 
     function inputHandler(event) {
         if(event.type === INPUT_EVENT_TYPE.movingOverSquare) {
-            showAllSquareControl(event.chessboard);
+            // showAllSquareControl(event.chessboard);
+            // console.log('event', event);
+            // if (event.squareTo){
+            //     showControlArrows(board, event.squareTo);
+            // }
         }
         if(event.type !== INPUT_EVENT_TYPE.moveInputFinished) {
             event.chessboard.removeLegalMovesMarkers();
-            showAllSquareControl(event.chessboard);
+            // showAllSquareControl(event.chessboard);
         }
         if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
             const moves = chess.moves({square: event.squareFrom, verbose: true})
@@ -234,17 +271,18 @@
 
     const board = new Chessboard(document.getElementById("board"), {
         position: chess.fen(),
-        assetsUrl: "./assets/",
+        assetsUrl: "./",
         responsive: true,
         style: {
             cssClass: "black-and-white",
             borderType: BORDER_TYPE.frame, 
-            pieces: {file: "pieces/staunty.svg"}, 
+            pieces: {file: "staunty.svg"}, 
             animationDuration: 300
         },
         orientation: COLOR.white,
         extensions: [
             {class: Markers, props: {autoMarkers: MARKER_TYPE.square}},
+            {class: Arrows},
             {class: PromotionDialog},
             {
                 class: Accessibility,
@@ -263,19 +301,7 @@
         .addEventListener("change", e => {
             showAllSquareControl(board);
         });
-    
-    document
-        .querySelector("#chkSquareControlHover")
-        .addEventListener("change", e => {
-            console.log("e", e);
-            if (e.target.checked) {
-                document.querySelector("#chkSquareControl").disabled=true;
-                board.removeMarkers();
-            } else {
-                document.querySelector("#chkSquareControl").disabled=false;
-                showAllSquareControl(board);
-            }
-        });
+
     document
         .querySelector("#ddFEN")
         .addEventListener("change", e => {
@@ -289,18 +315,29 @@
             applyFEN(board);
         });
 
-    document
-        .querySelectorAll("rect").forEach(rect => {
-            rect.addEventListener("mouseover", () => {
-                if (document.querySelector("#chkSquareControlHover").checked){
-                    board.removeMarkers();
-                    showSquareControl(board, rect.getAttribute('data-square'));
-                };
-            });
-        });
+    function addRectEventListeners() {
+        document.querySelectorAll("rect.square").forEach(rect => {
+            rect.addEventListener("mouseover", e => {
+                if (document.getElementById("chkSquareControlHover").checked){
+                    showControlArrows(board, e.target.getAttribute("data-square"));
+                }
+            })
+        })
+    }
     
+    addRectEventListeners();
+    const observer = new MutationObserver(() => {        
+        addRectEventListeners();
+    });
+
     showAllSquareControl(board);
     board.enableMoveInput(inputHandler, chess.turn);
+
+    observer.observe(document.getElementById("board"),  {
+        childList: true,
+        subtree: true
+    });
+
 </script>
 </body>
 </html>

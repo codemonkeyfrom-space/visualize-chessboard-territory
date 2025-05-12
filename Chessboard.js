@@ -40,7 +40,7 @@ export class Chessboard {
             position: FEN.empty, // set position as fen, use FEN.start or FEN.empty as shortcuts
             orientation: COLOR.white, // white on bottom
             responsive: true, // resize the board automatically to the size of the context element
-            assetsUrl: "./assets/", // put all css and sprites in this folder, will be ignored for absolute urls of assets files
+            assetsUrl: "./", // put all css and sprites in this folder, will be ignored for absolute urls of assets files
             assetsCache: true, // cache the sprites, deactivate if you want to use multiple pieces sets in one page
             style: {
                 cssClass: "default", // set the css theme of the board, try "green", "blue" or "chess-club"
@@ -49,7 +49,7 @@ export class Chessboard {
                 aspectRatio: 1, // height/width of the board
                 pieces: {
                     type: PIECES_FILE_TYPE.svgSprite, // pieces are in an SVG sprite, no other type supported for now
-                    file: "pieces/standard.svg", // the filename of the sprite in `assets/pieces/` or an absolute url like `https://…` or `/…`
+                    file: "standard.svg", // the filename of the sprite in `assets/pieces/` or an absolute url like `https://…` or `/…`
                     tileSize: 40 // the tile size in the sprite
                 },
                 animationDuration: 300 // pieces animation duration in milliseconds. Disable all animations with `0`
