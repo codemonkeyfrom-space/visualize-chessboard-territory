@@ -54,6 +54,8 @@
         </h2>
         <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked">
         <label for="chkSquareControl" title="Show square control by size of square border.">Show</label>
+        <input id="chkSquareControlHover" type="checkbox" name="checkboxName" value="checkboxValue">
+        <label for="chkSquareControlHover" title="Show square control only while hovering over the square.">Only on hover</label>
         <br/><br/>
         <br/><br/>
         <h2>
@@ -261,6 +263,19 @@
         .addEventListener("change", e => {
             showAllSquareControl(board);
         });
+    
+    document
+        .querySelector("#chkSquareControlHover")
+        .addEventListener("change", e => {
+            console.log("e", e);
+            if (e.target.checked) {
+                document.querySelector("#chkSquareControl").disabled=true;
+                board.removeMarkers();
+            } else {
+                document.querySelector("#chkSquareControl").disabled=false;
+                showAllSquareControl(board);
+            }
+        });
     document
         .querySelector("#ddFEN")
         .addEventListener("change", e => {
@@ -274,6 +289,16 @@
             applyFEN(board);
         });
 
+    document
+        .querySelectorAll("rect").forEach(rect => {
+            rect.addEventListener("mouseover", () => {
+                if (document.querySelector("#chkSquareControlHover").checked){
+                    board.removeMarkers();
+                    showSquareControl(board, rect.getAttribute('data-square'));
+                };
+            });
+        });
+    
     showAllSquareControl(board);
     board.enableMoveInput(inputHandler, chess.turn);
 </script>
