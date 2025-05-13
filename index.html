@@ -65,7 +65,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             Square Control
         </h2>
         <input id="chkSquareControl" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked">
-        <label for="chkSquareControl" title="Show square control by size of square border.">Show</label>
+        <label for="chkSquareControl" title="Show square control by size of square border.">Show square frames indicating control</label>
+        <br/>
         <input id="chkSquareControlHover" type="checkbox" name="checkboxName" value="checkboxValue" checked="checked">
         <label for="chkSquareControlHover" title="When hovering over a square, show arrows from the pieces controlling that square.">Show controlling pieces on hover</label>
         <br/><br/>
@@ -121,64 +122,62 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     import {ARROW_TYPE, Arrows} from "./Arrows.js"
     import {Chess, SQUARES} from "./chess.js"
     const svgNamespace = "http://www.w3.org/2000/svg";
-
     let chess = new Chess(document.getElementById("txtFEN").value );
 
     function showSquareControl(chessboard, square) {
-        const blackAttackers = chess.attackers(square, 'b').length;
-        const whiteAttackers = chess.attackers(square, 'w').length;
-        let netAttackers = blackAttackers - whiteAttackers;
-        let color = "";
-        if (netAttackers > 0) {
-            color = 'b';
-        } else if (netAttackers < 0) {
-            color = 'w';
-        }
-        netAttackers = Math.abs(netAttackers);
-        const blackMarkerType = MARKER_TYPE.framePrimary
-        const whiteMarkerType = MARKER_TYPE.frameDanger
-        const piece = chessboard.getPiece(square) || ""
-        if (color === 'b'){
-            for (let i=0; i < netAttackers; i++){
-                chessboard.addMarker(blackMarkerType, square);
-            }
-            if (piece.startsWith('w')){
-                chessboard.addMarker(MARKER_TYPE.circlePrimary, square);
-            }
-        } 
+        
+        if (document.getElementById("chkSquareControl").checked){
 
-        if (color === 'w') {
-            for (let i=0; i < netAttackers; i++){
-                chessboard.addMarker(whiteMarkerType, square);
+            const blackAttackers = chess.attackers(square, 'b').length;
+            const whiteAttackers = chess.attackers(square, 'w').length;
+            let netAttackers = blackAttackers - whiteAttackers;
+            let color = "";
+            if (netAttackers > 0) {
+                color = 'b';
+            } else if (netAttackers < 0) {
+                color = 'w';
             }
-            
-            if (piece.startsWith('b')){
-                chessboard.addMarker(MARKER_TYPE.circleDanger, square);
+            netAttackers = Math.abs(netAttackers);
+            const blackMarkerType = MARKER_TYPE.framePrimary
+            const whiteMarkerType = MARKER_TYPE.frameDanger
+            const piece = chessboard.getPiece(square) || ""
+            if (color === 'b'){
+                for (let i=0; i < netAttackers; i++){
+                    chessboard.addMarker(blackMarkerType, square);
+                }
+                if (piece.startsWith('w')){
+                    chessboard.addMarker(MARKER_TYPE.circlePrimary, square);
+                }
+            } 
+
+            if (color === 'w') {
+                for (let i=0; i < netAttackers; i++){
+                    chessboard.addMarker(whiteMarkerType, square);
+                }
+                
+                if (piece.startsWith('b')){
+                    chessboard.addMarker(MARKER_TYPE.circleDanger, square);
+                }
             }
         }
     }
 
     function showControlArrows(chessboard, square) {
-        chessboard.removeArrows();
-        const piece = chessboard.getPiece(square) || "";
-        const color = piece.charAt(0);
-        let redType = ARROW_TYPE.danger;
-        let blueType = ARROW_TYPE.default;
-        let dangerType = ARROW_TYPE.danger;
-        let nullType = ARROW_TYPE.danger;
-        let safeType = ARROW_TYPE.pointy;
-        chess.attackers(square, 'b').forEach((attacker) => {
-            chessboard.addArrow(blueType, attacker, square);
-
-        })
-        
-        chess.attackers(square, 'w').forEach((attacker) => {
-            chessboard.addArrow(redType, attacker, square);
-        });
-        
+        if (document.getElementById("chkSquareControlHover").checked){
+            chessboard.removeArrows();
+            let redType = ARROW_TYPE.danger;
+            let blueType = ARROW_TYPE.default;
+            chess.attackers(square, 'b').forEach((attacker) => {
+                chessboard.addArrow(blueType, attacker, square);
+            })
+            chess.attackers(square, 'w').forEach((attacker) => {
+                chessboard.addArrow(redType, attacker, square);
+            });
+        }
     }
 
     function showAllSquareControl(chessboard){
+        
         chessboard.removeMarkers();
         const checked = document.getElementById("chkSquareControl").checked;
         if (checked){
@@ -220,19 +219,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function inputHandler(event) {
         if(event.type === INPUT_EVENT_TYPE.movingOverSquare) {
-            // showAllSquareControl(event.chessboard);
-            // console.log('event', event);
-            // if (event.squareTo){
-            //     showControlArrows(board, event.squareTo);
-            // }
+            showControlArrows(board, event.squareTo);
         }
         if(event.type !== INPUT_EVENT_TYPE.moveInputFinished) {
-            event.chessboard.removeLegalMovesMarkers();
-            // showAllSquareControl(event.chessboard);
         }
         if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
             const moves = chess.moves({square: event.squareFrom, verbose: true})
             event.chessboard.addLegalMovesMarkers(moves);
+            event.chessboard.addMarker(MARKER_TYPE.circle, event.squareFrom);
             return moves.length > 0
         } else if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
             const move = {from: event.squareFrom, to: event.squareTo, promotion: event.promotion}
@@ -265,6 +259,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             if(event.legalMove) {
                 event.chessboard.disableMoveInput()
             }
+            event.chessboard.removeArrows();
             showAllSquareControl(event.chessboard);
         }
     }
@@ -300,6 +295,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         .querySelector("#chkSquareControl")
         .addEventListener("change", e => {
             showAllSquareControl(board);
+            localStorage.setItem("squareControl", document.getElementById("chkSquareControl").checked ? "1" : "0");
+        });
+
+    document
+        .querySelector("#chkSquareControlHover")
+        .addEventListener("change", e => {
+            showAllSquareControl(board);
+            localStorage.setItem("squareControlHover", document.getElementById("chkSquareControlHover").checked ? "1" : "0");
         });
 
     document
@@ -307,12 +310,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         .addEventListener("change", e => {
             document.getElementById("txtFEN").value = document.getElementById("ddFEN").value
             applyFEN(board);
+            localStorage.setItem("FEN", document.getElementById("txtFEN").value);
             showAllSquareControl(board);
         });
+
     document
         .querySelector("#btnFEN")
         .addEventListener("click", () => {
             applyFEN(board);
+            localStorage.setItem("FEN", document.getElementById("txtFEN").value);
         });
 
     function addRectEventListeners() {
@@ -325,19 +331,41 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         })
     }
     
-    addRectEventListeners();
-    const observer = new MutationObserver(() => {        
-        addRectEventListeners();
-    });
+    // addRectEventListeners();
+    // const observer = new MutationObserver(() => {        
+    //     addRectEventListeners();
+    // });
 
-    showAllSquareControl(board);
+    // observer.observe(document.getElementById("board"),  {
+    //     childList: true,
+    //     subtree: true
+    // });
     board.enableMoveInput(inputHandler, chess.turn);
 
-    observer.observe(document.getElementById("board"),  {
-        childList: true,
-        subtree: true
-    });
+    window.addEventListener("DOMContentLoaded", () => {
+        
+        const chk = document.getElementById("chkSquareControlHover");
+        const stored = localStorage.getItem("squareControlHover");
+        if (stored !== null) {
+            chk.checked = stored === "1";
+        }
 
+        const chk2 = document.getElementById("chkSquareControl");
+        const stored2 = localStorage.getItem("squareControl");
+        if (stored2 !== null) {
+            chk2.checked = stored2 === "1";
+        }
+
+        const fen = document.getElementById("txtFEN");
+        const storedFen = localStorage.getItem("FEN");
+        if (storedFen !== null) {
+            fen.value = storedFen;
+        }
+        
+        applyFEN(board);
+        showAllSquareControl(board);
+        
+    });
 </script>
 </body>
 </html>
