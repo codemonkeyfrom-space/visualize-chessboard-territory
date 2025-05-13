@@ -178,7 +178,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     function showAllSquareControl(chessboard){
         
-        chessboard.removeMarkers();
+        removeAllMarkers();
         const checked = document.getElementById("chkSquareControl").checked;
         if (checked){
             const squares = SQUARES;
@@ -217,6 +217,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         }
     }
 
+    function removeAllMarkers() {
+        const markerTypes = [
+            MARKER_TYPE.square,
+            MARKER_TYPE.frame,
+            MARKER_TYPE.dot,
+            MARKER_TYPE.circle
+        ];
+
+        for (const type of markerTypes) {
+            board.removeMarkers(type);
+        }
+    }
+
     function inputHandler(event) {
         if(event.type === INPUT_EVENT_TYPE.movingOverSquare) {
             showControlArrows(board, event.squareTo);
@@ -226,6 +239,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         if (event.type === INPUT_EVENT_TYPE.moveInputStarted) {
             const moves = chess.moves({square: event.squareFrom, verbose: true})
             event.chessboard.addLegalMovesMarkers(moves);
+            removeAllMarkers();
             event.chessboard.addMarker(MARKER_TYPE.circle, event.squareFrom);
             return moves.length > 0
         } else if (event.type === INPUT_EVENT_TYPE.validateMoveInput) {
